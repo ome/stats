@@ -1,0 +1,125 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+
+{% block link %}
+    <link rel="stylesheet" href="{% static "css/feedback.css" %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static "css/datepicker.css" %}" type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+    <script type="text/javascript" src='{% static "javascript/jquery_1.2.6.js" %}'></script>
+    <script type="text/javascript" src="{% static "javascript/ui/ui.datepicker.js" %}"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function() 
+            { 
+                $('#id_date').datepicker({rangeSelect: false, firstDay: 1, dateFormat: 'yy-mm-dd', rangeSeparator: '_'});
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    
+    <h2>{% trans "Feedback" %}</h2>
+    {% if user.is_authenticated %}   
+
+    {% if token_form %}<form action='{% url qa_feedback_action "add" %}' method="post" >{% csrf_token %}
+        <table><tr>
+            {% for field in token_form %}
+
+                    <th>{{ field.label_tag }}{% if field.field.required %}*{% endif %}</th><td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}<br/>{{ field.help_text|safe }}</td>
+
+            {% endfor %}<td><input type="submit" value="{% trans 'Add' %}" class="login"/></td></tr>
+            </table>
+    </form>
+    {% endif %}
+    
+    {% if filter_form %}
+    <script language="javascript">
+    function clear_form_elements(ele) {
+
+    	$(ele).find(':input').each(function() {
+            switch(this.type) {
+                case 'text':
+                    $(this).val('');
+                    break;
+                case 'select-one':
+                    $(this).val('new');
+                    break;
+            }
+    	});
+
+    }
+    </script>
+    
+    <form method="get">{% csrf_token %}
+        {% if app_name %}<input type="hidden" name="type" value="{{ app_name }}"/>{% endif %}
+    <table>
+        <tr>
+        {% for field in filter_form %}
+        <th>{{ field.label_tag }}:</th><td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}<br/>{{ field.help_text|safe }}</td>
+        {% endfor %}
+        </tr>
+        <tr>
+            <td colspan="10"></td><td colspan="2"><input type="hidden" value="do_filter" name="do_filter"/><input type="submit" value="{% trans 'Filter' %}" class="login"/> <input type="button" value="Clear All" onclick="clear_form_elements(this.form)"/> </td></tr>
+    </table>
+    </form>
+    <p>Filter tips:<ul>
+        <li><strong>Date: </strong>Pick a date from the calendar or type in format <strong>"yy-mm-dd"</strong>. Calendar appears while you click the field. Filtered records are from the picked date up till now.</li>
+        <li><strong>Text: </strong>Type the string that will be searched in: version, comment, error or selected file.</li>
+        <li><strong>User email: </strong> Type a username, first or last name or email address.</li>
+    </ul></p>
+    {% endif %}    
+    <br/>
+    
+    
+    | <a href="{% url feedback %}{% if params %}?{{ params }}{% endif %}" {% if not app_name %}class="selected"{% endif %}>All</a> |
+    {% for a in apps %}
+        <a href="{% url feedback %}?type={{ a.id }}{% if params %}&{{ params }}{% endif %}" {% ifequal app_name a.id_as_string %}class="selected"{% endifequal %}>{{ a.app_name }}</a> |
+    {% endfor %}
+
+    
+    <table class="feedback">
+        <tr><th>ID</th><th>Status</th><th>User/email</th><th>Type</th><th>Created</th><th>Selected file</th><th>Comment</th><th>Error</th></tr>
+    {% if feedback %}{% for f in feedback %}
+        <tr>
+            <td><a href="{% url qa_feedback_id f.id %}" target="_blank">{{ f.id }}</a></td>
+            <td>{{ f.status }}</td>
+            <td>{{ f.short_user_or_email }}</td>
+            <td>{{ f.short_app_name }}</td>
+            <td>{{ f.creation_date|date:"Y m d" }}</td>
+            <td {% if not f.checkSelectedFile %}class="missedList"{% endif %}>{{ f.short_selected_file|default_if_none:"-" }}</td>
+            <td><a href="{% url qa_feedback_id f.id %}" target="_blank">{{ f.short_comment|default_if_none:"-" }}</a></td>
+            <td><a href="{% url qa_feedback_id f.id %}" target="_blank">{{ f.short_error|default_if_none:"-" }}</a></td>
+        </tr>
+    {% endfor %}{% else %}
+    <tr><td colspan="7">No feedbacks</td></tr>
+    {% endif %}
+    </table>
+    
+    <div class="clear"> </div>
+    <div class="paging"> 
+        {% if paging.prev %}<a href="{% url feedback %}?{% if app_name %}type={{ app_name }}&{% endif %}page={{ paging.prev }}{% if params %}&{{ params }}{% endif %}">{% trans "preview" %}</a>{% endif %} {% trans "Page" %} 
+
+        {% for p in paging.total %}
+            {% ifequal paging.page p %}
+                {{ p }} 
+            {% else %}
+                {% ifequal p -1 %}
+                    ...
+                {% else %}
+                    <a href="{% url feedback %}?{% if app_name %}type={{ app_name }}&{% endif %}page={{ p }}{% if params %}&{{ params }}{% endif %}">{{ p }}</a>
+                {% endifequal %}
+            {% endifequal %}
+        {% endfor %}
+        {% if paging.next %}<a href="{% url feedback %}?{% if app_name %}type={{ app_name }}&{% endif %}page={{ paging.next }}{% if params %}&{{ params }}{% endif %}">{% trans "next" %}</a>{% endif %}
+
+    </div>
+    
+    {% else %}
+        <p>You cannot see list of your feedbacks? Log in! If you do not have your own account, please click the link in one of the email we sent you.</p>
+    {% endif %}
+    
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "css/swfupload.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+
+    <script type="text/javascript" src='{% static "javascript/jquery_1.2.6.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/jquery.cookie.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/helper.js" %}'></script>
+    
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.cookies.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.swfobject.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.queue.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/fileprogress.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/handlers.js" %}'></script>
+    
+    <script type="text/javascript">
+    var swfu;
+    var csrftoken = $.cookie('csrftoken');
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    });
+
+    SWFUpload.onload = function () {
+    	var settings = {
+    		flash_url : '{% static "javascript/swfupload/swfupload.swf" %}',
+    		upload_url: "{% url qa_web_upload_processing %}",
+    		post_params: { 'token': "{{ token }}", 'app_name':7, 'extra': "{{ extra }}" },
+    		file_post_name : "Filedata",
+    		file_size_limit : "2 GB",
+    		file_upload_limit : 2000,
+    		file_queue_limit : 200,
+    		custom_settings : {
+    			progressTarget : "fsUploadProgress",
+    			cancelButtonId : "btnCancel"
+    		},
+    		debug: false,
+
+    		// Button Settings
+    		button_image_url : '{% static "images/XPButtonUploadText_88x22.png" %}',
+    		button_placeholder_id : "spanButtonPlaceHolder",
+    		button_width: 88,
+    		button_height: 22,
+
+    		// The event handler functions are defined in handlers.js
+    		file_queued_handler : fileQueued,
+    		file_queue_error_handler : fileQueueError,
+    		file_dialog_complete_handler : fileDialogComplete,
+    		upload_start_handler : uploadStart,
+    		upload_progress_handler : uploadProgress,
+    		upload_error_handler : uploadError,
+    		upload_success_handler : uploadSuccess,
+    		upload_complete_handler : uploadComplete,
+    		queue_complete_handler : queueComplete,	// Queue plugin event
+    		swfupload_loaded_handler : swfUploadLoaded,
+            
+    		// SWFObject settings
+    		minimum_flash_version : "9.0.28",
+    		swfupload_pre_load_handler : swfUploadPreLoad,
+    		swfupload_load_failed_handler : swfUploadLoadFailed
+    	};
+
+    	swfu = new SWFUpload(settings);
+    }
+    </script>
+    
+{% endblock %}
+
+{% block content %}
+        
+    <h2 id="top">{% trans "Uploading sample images" %}</h2>
+
+    <p>{% trans "OMERO uses Bio-Formats to help with importing files. Any files listed as a " %}
+        <a href="https://www.openmicroscopy.org/site/support/bio-formats/supported-formats.html" target="_blank">{% trans "supported format" %}</a>
+       {% trans "should import into OMERO. If you have files that do not import, this is the place to let the OME team know." %}
+    </p>
+
+    {% if not user.is_authenticated %}
+    <br/>
+    <div id="email_form" class="form">    
+    <table>
+        {% for field in email_form %}
+        <tr>
+            <td><p><strong>{{ field.label_tag }}</strong> {{ field }}</p></td><td id="email_error">{% if field.errors %}{{ field.errors }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="separate50"></div>
+    </div>    
+    {% else %}
+        <div class="separate50"></div> 
+    {% endif %}
+    
+    {% if current_files %}
+    <div class="existing_message">
+        <p>{% trans "You already have created" %} <a href="{% url qa_feedback_id current_feedback.id %}">{% trans "feedback" %} {{ current_feedback.id }}</a>
+            {% trans "which containes" %} <strong>{{ current_files }} {% trans "files" %}</strong>.<br/>
+            {% trans "If you wish to upload more files, please continue. Or " %} <strong><a href="{% url qa_reset_token %}">{% trans "start again" %}</a></strong>. 
+        </p>
+    </div> 
+    <div class="separate50"></div>
+    {% endif %}
+
+    
+    <div class="uploadWrapper">
+        <div class="right">
+            <p><strong>{% trans "Multiselection:" %}</strong> {% trans "select up to" %} <strong>{% trans "200 files" %}</strong> {% trans "at once" %}.</p>
+            <p><img src='{% static "images/help/multiselect.png" %}'/></p>
+        </div>
+        <h1>{% trans "Choose images..." %}</h1>
+        <div>
+            <p><strong>{% trans "Uploaded file limit" %}</strong>: 2GB.</p>
+        </div>
+        <br/>
+        <div id="flashcontent">
+            <form id="form1" action="{% url qa_upload %}" method="post" enctype="multipart/form-data">{% csrf_token %}
+        		<div id="divSWFUploadUI">
+        		    <span class="legend">Upload Queue</span>
+        		    <div class="fieldset" id="fsUploadProgress">
+        		        <span >&nbsp;</span>
+            		</div>
+            		<div id="divStatus">{% if current_files %}{{ current_files }} {% ifequal current_files 1 %}file{% else %}files{% endifequal %} uploaded.{% else %}No file uploaded.{% endif %}</div>
+            		<div id="divMovieContainer">
+            			<span id="spanButtonPlaceHolder"></span>
+            			<input id="btnStart" type="button" value="Start Upload" onclick="swfu.startUpload();"  />
+            			<input id="btnCancel" type="button" value="Cancel All Uploads" />
+            			<input type="button" value="Feedback" onclick="document.location.href='{% url feedback %}';"  />
+            		</div>
+                </div>
+                                
+                <noscript>
+        			<div class="swfError">
+        				We're sorry.  SWFUpload could not load.  You must have JavaScript enabled to enjoy SWFUpload.
+        			</div>
+        		</noscript>
+        		<div id="divLoadingContent" class="swfError" style="display: none;">
+        			SWFUpload is loading. Please wait a moment...
+        		</div>
+        		<div id="divLongLoading" class="swfError" style="display: none;">
+        			SWFUpload is taking a long time to load or the load has failed.  Please make sure that the Flash Plugin is enabled and that a working version of the Adobe Flash Player is installed.
+        		</div>
+        		<div id="divAlternateContent" class="swfError" style="display: none;">
+        			We're sorry.  SWFUpload could not load.  You may need to install or upgrade Flash Player.
+        			Visit the <a href="http://www.adobe.com/shockwave/download/download.cgi?P1_Prod_Version=ShockwaveFlash">Adobe website</a> to get the Flash Player.
+        		</div>
+        		
+        	</form>
+        	
+        </div>
+    </div>
+    <div class="separate50"></div>
+{% endblock %}

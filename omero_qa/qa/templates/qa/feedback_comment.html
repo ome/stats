@@ -1,0 +1,34 @@
+{% load i18n %}
+{% load markup %}
+{% load custom_tags %}
+
+<h1>Leave a Reply</h1>
+{% if user_comment_form %}
+    {% if user.is_authenticated %}
+        <form action='{% url qa_feedback_id feedback.id "add_user_comment" %}?next={% url qa_feedback_id feedback.id %}' method="post">{% csrf_token %}
+        <table>
+            <tr><td>{{ user_comment_form.email.label_tag }}</td><td>{{ user.email }}</td><td>&nbsp;</td></tr>
+            <tr><td colspan="2">{{ user_comment_form.comment }}</td><td>{% if user_comment_form.comment.errors %}{{ user_comment_form.comment.errors }}{% endif %}</td></tr>
+            <tr><td colspan="3"><input type="submit" value="{% trans 'Send' %}" class="show"/></td></tr>
+        </table>
+        </form>
+    {% else %}
+        <form action='{% url qa_feedback_id feedback.id "add_user_comment" %}?next={% url qa_feedback_id feedback.id %}' method="post">{% csrf_token %}
+        <table>
+            <tr><td>{{ user_comment_form.email.label_tag }}</td><td>{{ user_comment_form.email }}</td><td>{% if user_comment_form.email.errors %}{{ user_comment_form.email.errors }}{% endif %}</td></tr>
+            <tr><td colspan="2">{{ user_comment_form.comment }}</td><td>{% if user_comment_form.comment.errors %}{{ user_comment_form.comment.errors }}{% endif %}</td></tr>
+            <tr><td colspan="3"><input type="submit" value="{% trans 'Send' %}" class="show"/></td></tr>
+        </table>
+        </form>
+    {% endif %}
+    
+{% endif %}
+
+{% if feedback.user_comment.all.count %}
+<h1>{{ feedback.user_comment.all.count }} comments:</h1>
+<table>        
+    {% for c in feedback.user_comment.all|order_by:"-creation_date" %}
+        <tr><td><p><a><strong><small>{{ c.creation_date|date:"Y m d H:i:s" }} by {{ c.short_email }}</small></strong></a></p><p>{{ c.comment|linebreaks }}</p><br/></td></tr>
+    {% endfor %}
+</table>
+{% endif %}

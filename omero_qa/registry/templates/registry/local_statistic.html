@@ -1,0 +1,183 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+{% load staticfiles %}
+
+{% block jscript %}
+    <script type="text/javascript" src='{% static "javascript/jquery_1.2.6.js" %}'></script>
+    
+    {% ifequal stats 4 %}
+    <script type="text/javascript">  
+        function ip2country (ip) {
+            if (ip == null) {
+                alert("No object selected.");
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url ip2country %}?ip="+ip, //this.href,
+                    contentType:'html',
+                    success: function(responce){
+                        alert(responce);
+                    },
+                    error: function(responce) {
+                        alert("Internal server error. Cannot check ip: "+ ip);
+                    }
+                });
+            }
+        };
+    </script>
+    {% else %}
+    <script type="text/javascript">
+        $(function () {
+            var img = new Image();
+            $(img).load(function () {
+                //$(this).css('display', 'none'); // .hide() doesn't work in Safari when the element isn't on the DOM already
+                $(this).hide();
+                $('#piechart').removeClass('loading').append(this);
+                $(this).fadeIn();
+            }).error(function () {
+                // notify the user that the image could not be loaded
+                $('#piechart').removeClass('loading')
+                $('#piechart').html('<p class="error">Chart could not be displayed.</p>').show();
+                }).attr('src', '{% url registry_local_statistic_chart %}?stats={{ stats }}').attr('width', 500);
+        });
+    </script>
+    {% endifequal %}
+    
+    <!--<script>
+    {% if stats %}
+        $(document).ready(function(){
+            
+            $("div#local_statistics").html('<p class="error">Loading... please wait, it can take about a minute.<img src ="{% static "images/spinner.gif" %}"/></p>');    
+            $.ajax({
+                type: "GET",
+                url: "{% url registry_local_statistic %}", //this.href,
+                data: "stats={{ stats }}",
+                contentType:'html',
+                success: function(responce){
+                    $("div#local_statistics").html(responce);
+                },
+                error: function(responce) {
+                    alert("Internal server error. Cannot load statistics.");
+                    $("div#local_statistics p").remove();
+                }
+            });
+                        
+        });
+    {% endif %}
+    </script>-->
+        
+
+{% endblock %}
+
+{% block content %}
+
+    {% if user.is_authenticated and user.is_staff %}
+    <h2>{% trans "Local statistics." %}</h2>
+    <p>{% trans "Local statistics are cached by the local cache backend and are updated every 24 hours" %}</p>
+    <br/>
+        <p>
+            | <a href="{% url registry_local_statistic %}?stats=1" {% ifequal stats 1 %}class="selected"{% endifequal %} title="Last 30 days">{% trans "Last 30 days" %}</a> 
+            | <a href="{% url registry_local_statistic %}?stats=2" {% ifequal stats 2 %}class="selected"{% endifequal %} title="Weekly starts"> {% trans "Weekly" %}</a> 
+            | <a href="{% url registry_local_statistic %}?stats=3" {% ifequal stats 3 %}class="selected"{% endifequal %} title="Starts per country"> {% trans "Starts per country" %}</a> 
+            | <a href="{% url registry_local_statistic %}?stats=4" {% ifequal stats 4 %}class="selected"{% endifequal %} title="Starts per IP"> {% trans "Starts per IP" %}</a> 
+            | <a href="{% url registry_local_statistic %}?stats=5" {% ifequal stats 5 %}class="selected"{% endifequal %} title="Operating System"> {% trans "Operating System" %}</a> 
+            | <a href="{% url registry_local_statistic %}?stats=6" {% ifequal stats 6 %}class="selected"{% endifequal %} title="Environment"> {% trans "Environment" %}</a>
+            | <a href="{% url registry_local_statistic %}?stats=7" {% ifequal stats 7 %}class="selected"{% endifequal %} title="Demo server"> {% trans "Demo server" %}</a> |
+        </p>
+        
+        <div class="separate50"></div>
+    
+    
+    {% ifequal stats 1 %}
+        <h1>{% trans "Last 30 days" %}</h1>
+        <p>{% trans "Daily starts per application for last 30 days." %}</p>
+    {% endifequal %}
+    
+    {% ifequal stats 2 %}
+        <h1>{% trans "Weekly" %}</h1>
+        <p>{% trans "Weekly starts per application." %}</p>
+    {% endifequal %}
+    
+    {% ifequal stats 3 %}
+        <h1>{% trans "Starts per country" %}</h1>
+    {% endifequal %}
+    
+    {% ifequal stats 4 %}
+        <h1>{% trans "Starts per IP" %}</h1>
+        <p>{% trans "Starts per IP address" %}</p>
+    {% endifequal %}
+    
+    {% ifequal stats 5 %}
+        <h1>{% trans "Operating System" %}</h1>
+    {% endifequal %}
+    
+    {% ifequal stats 6 %}
+        <h1>{% trans "Environment variables" %}</h1>
+    {% endifequal %}
+    
+    {% if result %}
+        {% ifequal stats 5 %}
+            <br/> 
+            <table><tr><td>           
+            <table>
+                {% for res in result %}
+                    <tr><th class="right">{{ res.0 }}</th><td>{{ res.1 }}</td><td>({{ res.2|floatformat:2 }}%)</td></tr>
+                {% endfor %}    
+            </table>
+            </td><td><div id="piechart" class="loading"></div></td></tr></table>
+        {% else %}
+        
+            <div id="piechart" class="loading"></div>
+            <br/>
+            
+            <table>
+                <tr><th>&nbsp;</th>
+                {% for cn in column_names %}
+                    <th>{{ cn }}</th> 
+                {% endfor %}
+                </tr>
+
+                {% for res in result %}
+                    <tr><th class="right">{{ res.0 }} {% ifequal stats 4 %}<a href="#" onclick="ip2country('{{ res.0 }}'); return false;"><img src='{% static "images/network.png" %}'/></a>{% endifequal %}</th>
+                    {% for res2 in res.1 %}
+                        <td class="center">{{ res2.1 }} {% if res2.2 %}({{ res2.2|floatformat:2 }}%){% endif %}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}    
+            </table>
+        {% endifequal %}
+    {% else %}
+        {% if not details %}<p class="error">No results</p>{% endif %}
+    {% endif %}
+    
+    {% if details %}
+        {% ifequal stats 5 %}
+            {% for k,v in details.items %}
+            <br/>
+            <p>{{ k }}</p>
+            <table>
+                {% for res in v %}
+                    <tr><th class="right">{{ res.0 }}</th><td>{{ res.1 }}</td><td>({{ res.2|floatformat:2 }}%)</td></tr>
+                {% endfor %}
+            </table>
+            {% endfor %}
+        {% endifequal %}
+        {% ifequal stats 6 %}
+            {% for k,v in details.items %}
+            <br/>
+            <p>{{ k }}</p>
+            <table>
+                {% for res in v %}
+                    <tr><th class="right">{{ res.0 }}</th><td>{{ res.1 }}</td><td>({{ res.2|floatformat:2 }}%)</td></tr>
+                {% endfor %}
+            </table>
+            {% endfor %}
+        {% endifequal %}
+    {% endif %}
+    
+    
+    {% endif %}
+    
+{% endblock %}

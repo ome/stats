@@ -1,0 +1,139 @@
+{% extends "validator/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "css/swfupload.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+
+    <script type="text/javascript" src='{% static "javascript/jquery_1.2.6.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/helper.js" %}'></script>
+    
+    {% if file_format %}
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.cookies.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.swfobject.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/swfupload.queue.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/fileprogress.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/swfupload/handlers.js" %}'></script>
+    
+    <script type="text/javascript">
+    var swfu;
+
+    SWFUpload.onload = function () {
+    	var settings = {
+    		flash_url : '{% static "javascript/swfupload/swfupload.swf" %}',
+    		upload_url: "{% url validator_web_upload_processing %}",
+    		//post_params: {},
+    		file_post_name : "Filedata",
+    		file_size_limit : "2 GB",
+    		file_types : "{{ file_format }}",
+    		file_types_description : "{{ file_format_name }}",
+    		file_upload_limit : 2000,
+    		file_queue_limit : 200,
+    		custom_settings : {
+    			progressTarget : "fsUploadProgress",
+    			cancelButtonId : "btnCancel",
+    		},
+    		debug: false,
+
+    		// Button Settings
+    		button_image_url : '{% static "images/XPButtonUploadText_88x22.png" %}',
+    		button_placeholder_id : "spanButtonPlaceHolder",
+    		button_width: 88,
+    		button_height: 22,
+
+    		// The event handler functions are defined in handlers.js
+    		file_queued_handler : fileQueued,
+    		file_queue_error_handler : fileQueueError,
+    		file_dialog_complete_handler : fileDialogComplete,
+    		upload_start_handler : uploadStart,
+    		upload_progress_handler : uploadProgress,
+    		upload_error_handler : uploadError,
+    		upload_success_handler : uploadSuccess,
+    		upload_complete_handler : uploadComplete,
+    		queue_complete_handler : queueComplete,	// Queue plugin event
+    		swfupload_loaded_handler : swfUploadLoaded,
+            
+    		// SWFObject settings
+    		minimum_flash_version : "9.0.28",
+    		swfupload_pre_load_handler : swfUploadPreLoad,
+    		swfupload_load_failed_handler : swfUploadLoadFailed
+    	};
+
+    	swfu = new SWFUpload(settings);
+    }
+    </script>
+    {% endif %}
+    
+{% endblock %}
+
+{% block content %}
+    <h2 id="top">{% trans "OME-XML validator" %}</h2>
+    
+    <p>This website provides a validator you can use to check your files. More information about XML schemas is available on <a href="http://www.openmicroscopy.org/Schemas/" target="_blank">2007-06 and newer schemas including current 2008-09</a> and <a href="http://www.openmicroscopy.org/XMLschemas/" target="_blank">legacy 2003 (FC) schemas</a>.</p>
+    <br/>
+    
+    <h1>What is OME-XML?</h1>
+    <p>OME-XML is a project to provide support for the exchange of microscope imaging data within the field of life sciences. Its key aspects include support for collaborative sharing of data between labs who may be using different apparatus, and the safeguarding of crucial metadata associated with image files that can be lost when they are moved across systems (or in many cases never recorded at all). More information is available on <a href="http://www.ome-xml.org/" target="_blank">OME-XML page</a>. OME-XML validator will check the OME-XML of uploaded files is valid against the OME schema referenced in the XML itself. The validator ensures that the XML structure is correct and all essential fields are present. </p>
+    <br/>
+    
+    {% if current_files %}
+    <div class="existing_message">
+        <p>{% trans "You already have uploaded" %} <strong>{{ current_files }} {% trans "files" %}</strong>. To see them please click <a href="{% url validator_file_list %}">here</a></p>
+    </div> 
+    <div class="separate50"></div>
+    {% endif %}
+    
+    <div class="uploadWrapper">
+        <div class="right">
+            <p><strong>{% trans "Multiselection:" %}</strong> {% trans "select up to" %} <strong>{% trans "200 files" %}</strong> {% trans "at once" %}.</p>
+            <p><img src='{% static "images/help/multiselect.png" %}'/></p>
+        </div>
+        <h1>{% trans "Step 1: Upload files." %}</h1>
+        <div>
+            <p><strong>{% trans "Accepted file:" %}</strong>: {% if file_format_name %}{{ file_format_name }}. Learn more about <a href="https://www.openmicroscopy.org/site/support/bio-formats/supported-formats.html" target="_blank">file formats...</a>{% endif %}</p>
+            <p><strong>{% trans "Uploaded file limit" %}</strong>: 2GB.</p>
+        </div>
+        <br/>
+        <div id="flashcontent">
+            <form id="form1" action="{% url validator_upload %}" method="post" enctype="multipart/form-data">
+        		<div id="divSWFUploadUI">
+        		    <span class="legend">Upload Queue</span>
+        		    <div class="fieldset" id="fsUploadProgress">
+        		        <span>&nbsp;</span>
+            		</div>
+            		<div id="divStatus">{% if current_files %}{{ current_files }} {% ifequal current_files 1 %}file{% else %}files{% endifequal %} uploaded.{% else %}No file uploaded.{% endif %}</div>
+            		<div id="divMovieContainer">
+            			<span id="spanButtonPlaceHolder"></span>
+            			<input id="btnStart" type="button" value="Start Upload" onclick="swfu.startUpload();"  />
+            			<input id="btnCancel" type="button" value="Cancel All Uploads" />
+            			<input id="btnValid" type="button" value="Validation" onclick="document.location.href='{% url validator_file_list %}';"  />
+            		</div>
+                </div>
+                                
+                <noscript>
+        			<div class="swfError">
+        				We're sorry.  SWFUpload could not load.  You must have JavaScript enabled to enjoy SWFUpload.
+        			</div>
+        		</noscript>
+        		<div id="divLoadingContent" class="swfError" style="display: none;">
+        			SWFUpload is loading. Please wait a moment...
+        		</div>
+        		<div id="divLongLoading" class="swfError" style="display: none;">
+        			SWFUpload is taking a long time to load or the load has failed.  Please make sure that the Flash Plugin is enabled and that a working version of the Adobe Flash Player is installed.
+        		</div>
+        		<div id="divAlternateContent" class="swfError" style="display: none;">
+        			We're sorry.  SWFUpload could not load.  You may need to install or upgrade Flash Player.
+        			Visit the <a href="http://www.adobe.com/shockwave/download/download.cgi?P1_Prod_Version=ShockwaveFlash">Adobe website</a> to get the Flash Player.
+        		</div>
+        		
+        	</form>
+        	
+        </div>
+    </div>
+    <div class="separate50"></div>
+{% endblock %}

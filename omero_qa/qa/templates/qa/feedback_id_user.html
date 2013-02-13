@@ -1,0 +1,128 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "css/feedback.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+    <script type="text/javascript" src='{% static "javascript/jquery_1.2.6.js" %}'></script>
+    <script type="text/javascript" src='{% static "javascript/jquery.tooltip.js" %}'></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#stat").tooltip({ 
+                track: true, 
+                showBody: " - ", 
+                top: -15, 
+                left: 5 
+            });
+        });
+    </script>
+    
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={% setting GOOGLE_KEY %}&sensor=false" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    function initialize() {
+        if (GBrowserIsCompatible()) {
+        var map = new GMap2(document.getElementById("map_canvas"));
+        map.setCenter(new GLatLng( {{ geo.0 }} , {{ geo.1 }}), 4);
+        map.addControl(new GSmallMapControl());
+        var point = new GLatLng( {{ geo.0 }} , {{ geo.1 }} );
+        map.addOverlay(new GMarker(point));
+        }
+    }
+    
+    </script>
+{% endblock %}
+
+{% block body %} onload="initialize()" onunload="GUnload()" {% endblock %}
+
+{% block content %}
+    {% if feedback %}
+    <h2><a href="{% url feedback %}">{% trans "Feedback" %}</a> | {% if feedback.app_name %}{{ feedback.app_name }} |{% endif %} {% if feedback.short_selected_file %}{{ feedback.short_selected_file }}{% else %}{{ feedback.id }}{% endif %} ({{ feedback.status }})</h2>
+    
+    <table class="feedback_details">
+        <tr><th>Url</th><td colspan="2"> {% setting APPLICATION_HOST %}{% url qa_feedback_id feedback.id %}?token={{ feedback.token }}</td></tr>
+        <tr><th>ID</th><td>{{ feedback.id }}</td>
+            <td rowspan="7">{% if geo %}<div id="map_canvas" style="width: 250px; height: 150px; border: 1px solid #bbb;"></div>{% else %}Google map not available.{% endif %}</td></tr>
+        <tr><th>Application</th><td>{{ feedback.app_name }} {{ feedback.app_version }}</td></tr>
+        <tr><th>Created</th><td>{{ feedback.creation_date|date:"Y m d H:i:s" }}</td></tr>
+        <tr><th>Status</th><td><strong>{{ feedback.status }}</strong> <span id="stat" title="Feedback status - <small><strong>New</strong>: Feedback was just created and is pending for import test.<br/><strong>Reopen</strong>: Feedback was reopened because of the new import error appeared.<br/><strong>Tested</strong>: Files included in feedback were tested. If any errors appeared they were listed as the test result.<br/><strong>Closed</strong>: Import error was fixed.<br/><strong>Suspended</strong>: This error will not be fixed soon.<br/><strong>Need info</strong>: Feedback requires more details from the user.</small>"><img src="{% static "images/help16.png" %}"></span></td></tr>
+        
+        <tr><th>Reported by</th><td>{{ feedback.user_or_email }}</td></tr>
+        <tr><th>From IP</th><td>{{ feedback.ip_address }}</td></tr>
+        <tr><th>OS name</th><td>{{ feedback.os_name }} {{ feedback.os_version }}</td></tr>
+        
+        <tr><th>Comment</th><td colspan="2">
+            {% if comment_form %}
+                <form action='{% url qa_feedback_id feedback.id "add_comment" %}?next={% url qa_feedback_id feedback.id %}' method="post">
+                <table>
+                    {% for field in comment_form %}
+                        <tr><td>{{ field }} <input type="submit" value="{% trans 'Save' %}" class="show"/></td><td>{% if field.errors %}{{ field.errors }}{% endif %}</td></tr>
+                    {% endfor %}
+                </table>
+                </form>
+            {% else %}
+                {% if feedback.comment %}{{ feedback.comment|linebreaks }}{% else %}-{% endif %}
+            {% endif %}
+            
+        </td></tr>
+        <tr><th>Error</th><td colspan="2">{% if feedback.error %}
+            <p><a href="{% url qa_error_content feedback.id %}" target="_blank">Open in new window</a></p>
+            <iframe src ="{% url qa_error_content feedback.id %}" width="100%" height="300"></iframe>{% else %}-{% endif %}
+        </td></tr>
+        
+        <tr><th>Ticket</th><td colspan="2"><p>{% if feedback.ticket.all %}Exiting ticket: | {% for t in feedback.ticket.all %}<a href="{{ t.system.prefix }}{{ t.system.url }}/ticket/{{ t.ticket }}" target="_blank">{{ t.ticket }}</a> | {% endfor %}{% else %}no tickets{% endif %}</p><br/></td></tr>
+        
+        {% if fileset %}
+        <tr><th>Test files</th><td colspan="2">
+            {% if format %}<p><strong>Want to upload more files here? <a href="{% url qa_upload %}?email={{ feedback.only_email }}&file_format={{ format }}&token={{ feedback.token }}">click</a></strong></p>{% endif %}
+
+            {% if fileset.existing or fileset.missed or fileset.unknown or fileset.selected %}
+            <br/><p>List of files:</p>
+            <ul class="feedback">
+                {% if fileset.selected %}
+                    <li>{{ fileset.selected.file_path|default_if_none:"" }}<strong>{{ fileset.selected.file_name }}</strong> <img src="{% static "images/ok16.png" %}"></li>
+                {% endif %}
+                {% for fe in fileset.existing %}
+                    <li>{{ fe.file_path|default_if_none:"" }}{{ fe.file_name }}<img src="{% static "images/ok16.png" %}"></li>
+                {% endfor %}
+
+                {% for fm in fileset.missed %}
+                    <li class="missedList">{{ fm.file_path|default_if_none:"" }}<strong>{{ fm.file_name }}<img src="{% static "images/no16.png" %}"></strong></li>
+                {% endfor %}
+
+                {% for fu in fileset.unknown %}
+                    <li>{{ fu.file_path|default_if_none:"" }}{{ fu.file_name }}<img src="{% static "images/okw16.png" %}"></li>
+                {% endfor %}
+            </ul> 
+            {% endif %}
+            
+            <br/><p><strong>Help:</strong> <img src="{% static "images/ok16.png" %}"> - Expected and completed file. <img src="{% static "images/okw16.png" %}"> - File was uploaded by the web uploader. <img src="{% static "images/no16.png" %}"> - File is missing. {% if format %}Please use <a href='{% url qa_upload %}?file_format={{ format }}&token={{ feedback.token }}'>this link</a> to complete the upload.{% endif %}</p>
+            
+        </td></tr>
+        {% endif %}
+        
+        <tr><th>Test results</th><td colspan="2">
+            {% if test_results %}<p>Errors: |
+                {% for tr in test_results %}
+                    <a href="{% url qa_test_error_content tr.id %}" target="test_error">{{ tr.id }}</a> | 
+                {% endfor %}</p><br/>
+                    <p><a href="{% url qa_test_error_content test_results.0.id %}" target="_blank">Open in new window</a>
+                    <iframe src ="{% url qa_test_error_content test_results.0.id %}" width="100%" height="300" name="test_error"></iframe></p>
+            {% else %}
+                {% trans "No errors in this fileset." %}
+            {% endif %}
+        </td></tr>
+    </table>
+    
+    <div class="separate30"></div> 
+    {% include "qa/feedback_comment.html" %}
+    
+    {% endif %}
+    
+{% endblock %}

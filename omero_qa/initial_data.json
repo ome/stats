@@ -1,0 +1,112 @@
+[
+    {
+        "pk": 1,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>Hi OMERO user!</p><p>Thank you for your feedback. Please follow the status of the feedback on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p><p>OMERO team</p>",
+            "template": "upload_message",
+            "content_txt": "Hi OMERO user! \n\n Thank you for your feedback. Please follow the status of the feedback on: %s/qa/feedback/%s/?token=%s \n\n OMERO team"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>New feedback was created on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p> <p><b>Comment:</b> %s </p> <p><b>Error:</b> %s </p>",
+            "template": "upload_message_staff",
+            "content_txt": "New feedback was created on: %s/qa/feedback/%s/?token=%s \n\n Comment: %s \n\n Error: %s "
+        }
+    },
+    {
+        "pk": 3,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>Hi OMERO user!</p><p>Status of your feedback has been changed to <strong>'%s'</strong>. More details available on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p><p>--OMERO team</p>",
+            "template": "status_message",
+            "content_txt": "Hi OMERO user! \n\n Status of your feedback has been changed to '%s'. More details available on: %s/qa/feedback/%s/?token=%s \n\n--OMERO team"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>Status of your feedback has been changed to <strong>'%s'</strong>. More details available on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p>",
+            "template": "status_message_staff",
+            "content_txt": "Status of your feedback has been changed to '%s'. More details available on: %s/qa/feedback/%s/?token=%s "
+        }
+    },
+    {
+        "pk": 5,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>Hi OMERO user!</p><p>New comment available to the feedback on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p><p><b>Comment:</b> %s </p><p>OMERO team</p>",
+            "template": "comment_message",
+            "content_txt": "Hi OMERO user! \n\n There is new comment available to your feedback on: %s/qa/feedback/%s/?token=%s \n\n Comment: %s \n\n OMERO team"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "feedback.emailtemplate",
+        "fields": {
+            "content_html": "<p>New comment available to the feedback on: <a href=\"%s/qa/feedback/%s/?token=%s\">%s/qa/feedback/%s/?token=%s</a></p><p><b>Comment:</b> %s </p>",
+            "template": "comment_message_staff",
+            "content_txt": "There is new comment available to your feedback on: %s/qa/feedback/%s/?token=%s \n\n Comment: %s"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.importer",
+            "display_name": "OMERO.importer"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.insight",
+            "display_name": "OMERO.insight"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.editor",
+            "display_name": "OMERO.editor"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.fs",
+            "display_name": "OMERO.fs"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.web",
+            "display_name": "OMERO.web"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.server",
+            "display_name": "OMERO.server"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "registry.agent",
+        "fields": {
+            "agent_name": "OMERO.imagej",
+            "display_name": "BioFormats"
+        }
+    }
+]

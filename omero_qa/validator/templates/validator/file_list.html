@@ -1,0 +1,221 @@
+{% extends "validator/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "css/layout.css" %}' type="text/css" media="screen"/>
+    <link rel="stylesheet" href='{% static "css/tablesorter.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+    <script type="text/javascript" src="{% static "javascript/jquery_1.2.6.js" %}"></script>
+    <script type="text/javascript" src="{% static "javascript/jquery.tablesorter.js" %}"></script>
+    <script type="text/javascript" src="{% static "javascript/jquery.quicksearch.js" %}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() 
+        { 
+            $("#fileTable").tablesorter( {sortList: [[1,0]]} ); 
+        } 
+    );
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('table#fileTable tbody tr').quicksearch({
+            attached: "table.tablesorter",
+            position: "before",
+            stripeRowClass: null,
+            labelText: '{% trans "Filter" %}:',
+            inputText: '{% trans "search" %}',
+            loaderImg: '{% static "images/spinner.gif" %}',
+        });
+
+    })
+</script>
+{% endblock %}
+
+{% block content %}
+
+    <h2 id="top">{% trans "OME-XML validator" %}</h2>
+
+    <h1>{% trans "Step 2: Validation" %}</h1>
+    <div class="separate50"></div>
+    
+    <div class="existing_message">
+        <p>{% trans "If you wish to validate more files, come back to" %} <a href="{% url validator_upload %}">{% trans "upload page" %}</a>.</p>
+    </div> 
+    <div class="separate50"></div>
+    
+    {% if controller.file_name %}
+    <div>
+        <h1>Step 3: Validation result</h1>
+        <p>File: <strong>{{ controller.file_name }}</strong></p>
+        <p>File schema: <strong>{{ controller.schema }}</strong></p>
+        <p>
+            <ul>
+                <li>
+                    {% if controller.result.isOmeXml and not controller.result.hasUnresolvableIds %}
+                    <span>The file is <strong>valid</strong>.</span>
+                    {% else %}
+                    <span>The file is <strong>not valid</strong>. </span>
+                    {% endif %}
+                    {% if controller.result.hasUnresolvableIds %}
+                    <span>The file is <strong>valid</strong> but <strong>incomplete</strong> as it has unresolved IDs. </span>
+                    {% endif %}
+                    {% if not controller.result.isOmeXml %}
+                    <span>The file is <strong>invalid</strong>. </span>
+                    {% endif %}
+                </li>
+                <li>
+                    {% if controller.result.isOmeTiff %}
+                    <span>The file is an OME-TIFF. </span>
+                    {% endif %}
+                    {% if not controller.result.isOmeTiff %}
+                    <span>The file is not an OME-TIFF. </span>
+                    {% endif %}
+                </li>
+                <li>
+                    {% ifequal controller.result.hasParsedXml None %}
+                    <span>The file's xml was not parsed. </span>
+                    {% else %}
+                    {% if controller.result.hasParsedXml %}
+                    <span>The file's xml could be parsed. </span>
+                    {% else %}
+                    <span>The file's xml could not be parsed. </span>
+                    {% endif %}
+                    {% endifequal %}
+                </li>
+                <li>
+                    {% ifequal controller.result.isInternallyConsistent None %}
+                    <span>The file was not checked for internal consistency. </span>
+                    {% else %}
+                    {% if controller.result.isInternallyConsistent %}
+                    <span>The file appears internally consistent. </span>
+                    {% else %}
+                    <span>The file failed checks for internal consistency. </span>
+                    {% endif %}
+                    {% endifequal %}
+                </li>
+                <li>
+                    {% ifequal controller.result.isOmeTiffConsistent None %}
+                    <span>The OME-TIFF data was not compared to the OME-TIFF metadata. </span>
+                    {% else %}
+                    {% if controller.result.isOmeTiffConsistent %}
+                    <span>The OME-TIFF data appears consistent with the OME-TIFF metadata. </span>
+                    {% else %}
+                    <span>The OME-TIFF data appears inconsistent with the OME-TIFF metadata. </span>
+                    {% endif %}
+                    {% endifequal %}
+                </li>
+                <li>
+                    {% ifequal controller.result.hasCustomAttributes None %}
+                    <span>The file was not checked for custom attributes. </span>
+                    {% else %}
+                    {% if controller.result.hasCustomAttributes %}
+                    <span>The file has custom attributes. </span>
+                    {% else %}
+                    <span>No custom attributes were found. </span>
+                    {% endif %}
+                    {% endifequal %}
+              </li>
+            </ul>
+    		<!--<p>debug-begin</p>
+    	        {% if controller.result.hasParsedXml %}<p>hasParsedXml: {{ controller.result.hasParsedXml }}</p>{% endif %}
+    	        {% if controller.result.isOmeXml %}<p>isOmeXml: {{ controller.result.isOmeXml }}</p>{% endif %}
+    	        {% if controller.result.isXsdValid %}<p>result.isXsdValid isXsdValid: {{ controller.result.isXsdValid }}</p>{% endif %}
+    	        {% if controller.result.hasUnresolvableIds %}<p>result.hasUnresolvableIds hasUnresolvableIds: {{ controller.result.hasUnresolvableIds }}</p>{% endif %}
+    	        {% if controller.result.isInternallyConsistent %}<p>result.isInternallyConsistent isInternallyConsistent: {{ controller.result.isInternallyConsistent }}</p>{% endif %}
+    	        {% if controller.result.isOmeTiff %}<p>result.isOmeTiff isOmeTiff: {{ controller.result.isOmeTiff }}</p>{% endif %}
+    	        {% if controller.result.isOmeTiffConsistent %}<p>result.isOmeTiffConsistent isOmeTiffConsistent: {{ controller.result.isOmeTiffConsistent }}</p>{% endif %}
+    	        {% if controller.result.hasCustomAttributes %}<p>result.hasCustomAttributes hasCustomAttributes: {{ controller.result.hasCustomAttributes }}</p>{% endif %}
+    	        {% if controller.result.theNamespace %}<p>result.theNamespace theNamespace: {{ controller.result.theNamespace }}</p>{% endif %}
+    	        <p>debug-end</p>
+    		</div>-->
+        </p>        
+        <div>
+            {% if controller.result.errorList %}
+            <h3 class="table">Error list</h3>
+            <table>
+                <tr>
+                    <th class="line">Line</th>
+                    <th class="column">Column</th>
+                    <th class="type">Type</th>
+                    <th class="msg">Message</th>
+                </tr>
+                {% for error in controller.result.errorList %}
+                <tr>
+                    <td>{{ error.line|default_if_none:"-" }}</td>
+                    <td>{{ error.column|default_if_none:"-" }}</td>
+                    <td>{{ error.errortype|default_if_none:"-" }}</td>
+                    <td><strong>{{ error.message|default_if_none:"-" }}</strong></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}            
+            {% if controller.result.warningList %}
+            <h3 class="table">Warning list</h3>
+            <table>
+                <tr>
+                    <th class="line">Line</th>
+                    <th class="column">Column</th>
+                    <th class="type">Type</th>
+                    <th class="msg">Message</th>
+                </tr>
+                {% for warning in controller.result.warningList %}
+                <tr>
+                    <td>{{ warning.line|default_if_none:"-" }}</td>
+                    <td>{{ warning.column|default_if_none:"-" }}</td>
+                    <td>{{ warning.errortype|default_if_none:"-" }}</td>
+                    <td><strong>{{ warning.message|default_if_none:"-" }}</strong></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}            
+            {% if controller.result.unresolvedList %}
+            <h3 class="table">Unresolved list</h3>
+            <table>
+                <tr>
+                    <th class="line">Line</th>
+                    <th class="column">Column</th>
+                    <th class="type">Type</th>
+                    <th class="msg">Message</th>
+                </tr>
+                {% for unresolve in controller.result.unresolvedList %}
+                <tr>
+                    <td>{{ unresolve.line|default_if_none:"-" }}</td>
+                    <td>{{ unresolve.column|default_if_none:"-" }}</td>
+                    <td>{{ unresolve.errortype|default_if_none:"-" }}</td>
+                    <td><strong>{{ unresolve.message|default_if_none:"-" }}</strong></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+          </div>
+    </div>
+    <div class="separate50"></div>
+    {% endif %}
+    
+    {% if controller.dir_list %}
+    <h1>{% ifequal controller.counter 1 %}{{ controller.counter }} {% trans "file" %}{% else %}{{ controller.counter }} {% trans "files" %}{% endifequal %} currently on your list.</h1>
+    <div>
+    <table id="fileTable" class="tablesorter">
+        <thead>
+            <tr><th>Action</th><th>File name</th>
+        </thead>
+        <tbody>
+            {% for file in controller.dir_list %}
+            <tr><td class="action"><a href="?file={{ file }}"><img src="{% static "images/advanced16.png" %}" alt="validate" title="Validate"></a> <a href="{% url validator_delete_file file %}" onClick="return confirm('Are you sure you want to delete file: {{ file }}?');"><img src="{% static "images/no16.png" %}"></a></td><td class="link">{{ file|short_name }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p>No files uploaded.</p>
+    {% endif %}
+    
+{% endblock %}

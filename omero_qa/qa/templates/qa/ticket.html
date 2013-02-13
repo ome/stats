@@ -1,0 +1,25 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "css/feedback.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block content %}
+    <h2>{% trans "Create new ticket for feedback" %} {{ fid }}</h2>
+    <div class="separate50"></div>
+    <form action="{% url qa_ticket "save" fid %}" method="post">{% csrf_token %}
+    <table>
+        {% for field in ticket_form %}
+            <tr>
+                <th>{{ field.label_tag }}{% if field.field.required %}*{% endif %}</th><td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+            <tr><td></td><td><input type="submit" value="{% trans 'Save' %}" /></td></tr>
+        </table>
+    </form>
+    
+{% endblock %}

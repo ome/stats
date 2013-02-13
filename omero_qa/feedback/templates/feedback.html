@@ -1,0 +1,22 @@
+{% extends "base_error.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div>
+        <h1>{% trans "Feedback." %}</h1>
+
+        <p>{% trans "Please give us feedback to help to improve the OMERO applications. Thanks for your patience." %}</p>
+        {% if error %}<ul class="errorList"><li>{{ error }}</li></ul>{% endif %}
+        
+        <form action="{% url sendfeedback %}" method="post">{% csrf_token %}
+        <table>
+            {% for field in form %}
+                <tr><th>{{ field.label_tag }}{% if field.field.required %}*{% endif %}</th>
+                    <td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}<br/>{{ field.help_text|safe }}</td>
+                </tr>
+            {% endfor %}
+                <tr><td colspan="2"><input type="submit" value="Send" /></td></tr>
+            </table>
+        </form>
+    </div>
+{% endblock %}

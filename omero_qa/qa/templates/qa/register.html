@@ -1,0 +1,21 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+
+{% block content %}
+    <h2>{% trans "Create an account." %}</h2>
+    <p>Your Account! Sign up now, and you'll instantly be able to get a full access to powerful feedback tools.<br/>
+        Please be aware that if you wish to view feedbacks already submitted you need to register with the same email address.</p>
+    <div class="separate50"></div>
+    <form action="{% url qa_register %}" method="post">{% csrf_token %}
+    <table>
+        {% for field in form %}
+            <tr>
+                <th>{{ field.label_tag }}{% if field.field.required %}*{% endif %}</th><td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+            <tr><td></td><td><input type="submit" value="{% trans 'Save' %}" /></td></tr>
+        </table>
+    </form>
+    
+{% endblock %}

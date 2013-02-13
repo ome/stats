@@ -1,0 +1,6 @@
+.DS_Store
+*.pyc
+.*.swp
+log
+omero_qa/GeoIP.dat
+omero_qa/GeoLiteCity.dat

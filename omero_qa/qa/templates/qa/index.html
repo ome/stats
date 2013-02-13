@@ -1,0 +1,32 @@
+{% extends "qa/base.html" %}
+{% load i18n %}
+{% load markup %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>{% trans "OMERO.qa" %}</h2>
+
+    <div class="left"><p><strong>{% trans "OMERO.qa" %}</strong> {% trans " provides support services for users of OME's tools and resources. It can be used to track and comment on feedback you have submitted to the OME team as it is dealt with. QA handles bugs and comments submitted from the client applications. It also manages the import testing of image files which fail to import properly. These files can be submitted by the OMERO.importer when an import error is generated and can also be submitted directly to the QA website." %}</p>
+    
+    <div class="separate50"></div>
+    
+    <p>{% trans "If you wish to connect with others who use the OMERO platform, share knowledge and experiences, take the advantage of the community's expertise and join our" %} <a href="http://www.openmicroscopy.org.uk/community/">{% trans "forum" %}</a> {% trans "or" %} <a href="http://www.openmicroscopy.org.uk/site/community/mailing-lists">{% trans "mailing lists." %}</a></p>
+    
+    <div class="separate50"></div>
+    
+    <p><strong>{% trans "Learn more about Open Microscopy Environment." %}</strong></p>
+
+    <p>{% trans "OME is an umbrella term that stands for" %} <strong>{% trans "Open Microscopy Environment" %}</strong> {% trans "and covers:" %}
+    <ul>
+        <li>{% trans "The  OME file formats, including OME-XML and OME-TIFF, and the Bio-Formats Java library." %}</li>
+        <li>{% trans "The  OME database systems for microscopy data management and analysis comprising the original OME Server and the OMERO." %}</li>
+        <li>{% trans "The  OME consortium, the group behind these efforts." %}</li>
+    </ul>
+    </p>
+
+    <p>{% trans "The core site for the Open Microscopy Environment is located at" %} <a href="http://www.openmicroscopy.org/">http://www.openmicroscopy.org/</a></p></div>
+    
+    <div class="right"><img src='{% static "images/help/screenshots.png" %}'/></div>
+    <div class="separate50"></div>
+    
+{% endblock %}
