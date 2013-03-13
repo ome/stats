@@ -76,7 +76,7 @@
             <iframe src ="{% url qa_error_content feedback.id %}" width="100%" height="300"></iframe>{% else %}-{% endif %}
         </td></tr>
         
-        <tr><th>Ticket</th><td colspan="2"><p>{% if feedback.ticket.all %}Exiting ticket: | {% for t in feedback.ticket.all %}<a href="{{ t.system.prefix }}{{ t.system.url }}/ticket/{{ t.ticket }}" target="_blank">{{ t.ticket }}</a> | {% endfor %}{% else %}no tickets{% endif %}</p><br/></td></tr>
+        <tr><th>Ticket</th><td colspan="2"><p>{% if feedback.ticket.all %}Existing ticket: | {% for t in feedback.ticket.all %}<a href="{{ t.system.prefix }}{{ t.system.url }}/ticket/{{ t.ticket }}" target="_blank">{{ t.ticket }}</a> | {% endfor %}{% else %}no tickets{% endif %}</p><br/></td></tr>
         
         {% if fileset %}
         <tr><th>Test files</th><td colspan="2">

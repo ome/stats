@@ -81,7 +81,7 @@
             <iframe src ="{% url qa_error_content feedback.id %}" width="100%" height="300"></iframe>{% else %}-{% endif %}
         </td></tr>
         
-        <tr><th>Ticket</th><td colspan="2"><p><a href="{% url qa_ticket "new" feedback.id %}">Create new <img src="{% static "images/edit_add16.png" %}"></a> <a href="{% url qa_ticket "add" feedback.id %}">Add existing <img src="{% static "images/edit_add16.png" %}"></a></p><p>{% if feedback.ticket.all %}Exiting ticket: | {% for t in feedback.ticket.all %}<a href="{{ t.system.prefix }}{{ t.system.url }}/ticket/{{ t.ticket }}" target="_blank">{{ t.ticket }}</a> | {% endfor %}{% else %}no tickets{% endif %}</p><br/></td></tr>
+        <tr><th>Ticket</th><td colspan="2"><p><a href="{% url qa_ticket "new" feedback.id %}">Create new <img src="{% static "images/edit_add16.png" %}"></a> <a href="{% url qa_ticket "add" feedback.id %}">Add existing <img src="{% static "images/edit_add16.png" %}"></a></p><p>{% if feedback.ticket.all %}Existing ticket: | {% for t in feedback.ticket.all %}<a href="{{ t.system.prefix }}{{ t.system.url }}/ticket/{{ t.ticket }}" target="_blank">{{ t.ticket }}</a> | {% endfor %}{% else %}no tickets{% endif %}</p><br/></td></tr>
         
         <tr><th>Java version</th><td colspan="2">{{ feedback.java_version }}</td></tr>
         <tr><th>Java classpath</th><td colspan="2">{{ feedback.java_classpath }}</td></tr>
