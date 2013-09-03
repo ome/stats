@@ -1,0 +1,97 @@
+{% extends "registry/base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+  Copyright (C) 2009-2015 University of Dundee & Open Microscopy Environment.
+  All rights reserved.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+{% endcomment %}
+
+{% block link %}
+    <link rel="stylesheet" href="{% static "registry/css/jquery-ui.1.10.4.min.css" %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{% static "registry/css/jquery.multiselect.css" %}" type="text/css" media="screen"/>
+    <link rel="stylesheet" href='{% static "registry/javascript/jquery.tablesorter/themes/blue/style.css" %}' type="text/css" media="screen"/>
+{% endblock %}
+
+{% block jscript %}
+    <script type="text/javascript" src='{% static "registry/javascript/jquery-1.10.2.js" %}'></script>
+    <script type="text/javascript" src='{% static "registry/javascript/jquery-ui.1.10.4.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "registry/javascript/jquery.multiselect.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "registry/javascript/jquery.tablesorter/jquery.tablesorter.min.js" %}'></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+		$("table#rowspan").tablesorter({debug: true});
+        $("#id_agent").multiselect();
+    });
+    $( document ).tooltip();
+    </script>
+{% endblock %}
+
+{% block content %}
+
+    {% if versionform %}<form action="{% url 'registry_local_statistic' %}" method="POST" >{% csrf_token %}
+            <table><tr>
+                {% for field in versionform %}
+                    <th>{{ field.label_tag }}{% if field.field.required %}*{% endif %}</th><td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}</td>
+                {% endfor %}<td><strong><input type="submit" value="{% trans 'Load' %}" class="login"/></strong></td></tr>
+                </table>
+        </form>
+    {% endif %}
+    
+    
+    {% if result %}
+        
+    <br/>
+            
+    <table id="rowspan" cellspacing="0" class="tablesorter">
+        <tr><th rowspan=2>Organisation</th><th rowspan=2>Domain</th>
+            {% for k,v in result.items.1.1.items %} 
+            {% ifnotequal k "domain" %}
+            <th colspan=2>{{k}}</th>
+            {% endifnotequal %}
+            {% endfor %}
+        </tr>
+        <tr>
+            {% for k,v in result.items.1.1.items %} 
+            {% ifnotequal k "domain" %}
+            <th >Total</th><th>Unique</th>
+            {% endifnotequal %}
+            {% endfor %}
+        </tr>
+
+        {% for k, v in result.items %} 
+        <tr>
+            <td>{{k}}</td>
+            <td>{{v.domain|default_if_none:""}}</td>
+            
+            {% for ak, av in v.items %}
+                {% ifnotequal ak "domain" %}
+                <td>{% if av.total > 0 %}{{av.total}}{% else %} {% endif %}</td>
+                <td>{% if av.total > 0 %}{{av.unique}}{% else %} {% endif %}</td>
+                {% endifnotequal %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% else %}
+        {% if not details %}<p class="error">No results</p>{% endif %}
+    {% endif %}
+
+{% endblock %}
