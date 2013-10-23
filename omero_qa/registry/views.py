@@ -346,6 +346,7 @@ def get_markers_as_xml(request):
 
 
 def hit(request):
+    stable_omero_downloads = 'http://downloads.openmicroscopy.org/latest-stable/omero'
     agent = None
     try:
         agt = request.META.get('HTTP_USER_AGENT', '')
@@ -370,10 +371,6 @@ def hit(request):
         agent_version = request.REQUEST.get('version')
         ver = Version.objects.get(pk=1)
         if agent_version is not None:
-            """
-            The download link used in the update var will have to be updated
-            to also handle develop updates once they become available.
-            """
             try:
                 regex = re.compile("^.*?[-]?(\\d+[.]\\d+([.]\\d+)?)[-]?.*?$")
 
@@ -387,9 +384,9 @@ def hit(request):
             except:
                 rv = True
             if rv:
-                update = 'Please upgrade to %s See http://downloads.openmicroscopy.org/latest-stable/omero for the latest version' % ver
+                update = 'Please upgrade to %s. See %s for the latest version.' % (ver, stable_omero_downloads)
         else:
-            update = 'Please upgrade to %s See http://downloads.openmicroscopy.org/latest-stable/omero for the latest version' % ver
+            update = 'Please upgrade to %s. See %s for the latest version.' % (ver, stable_omero_downloads)
     except:
         logger.debug(traceback.format_exc())
     logger.debug("Agent version %s" % agent_version)
