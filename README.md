@@ -14,79 +14,58 @@ Development Installation
 
 1. Clone the repository
 
-        git clone git@github.com:openmicroscopy/qa.git
+        git clone git@github.com:openmicroscopy/stats.git
 
 2. Set up a virtualenv (http://www.pip-installer.org/) and activate it
 
-        curl -O -k https://raw.github.com/pypa/virtualenv/master/virtualenv.py
-        python virtualenv.py qa-virtualenv
-        source qa-virtualenv/bin/activate
-        pip install numpy
+        pip install virtualenv
+        virtualenv --system-site-packages stats-virtualenv
+        source stats-virtualenv/bin/activate
+
+3. Install dependencies
+
+        pip install matplotlib
+        pip install psycopg2
+        pip install mercurial
         pip install -r requirements.txt
 
-3. Set up your database
+4. Dump and restore database.
 
-        # Create a PostgreSQL user
-        sudo -u postgres createuser -P -D -R -S feedback_user
-        # Create a database
-        sudo -u postgres createdb -O feedback_user feedback
+5. Download and extract GeoIP databases
 
-4. Download and extract the GeoIP country and city databases
-
-        curl -O http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-        curl -O http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
-        gzip -d GeoIP.dat.gz
-        gzip -d GeoLiteCity.dat.gz
-
-5. How to migrate the existing database
-    * Generate files by the script doc/dbdump.py
-    * Execute select count(*) from hit;
-    * edit the dbdump.py and change LIMIT if 10 000 000 is not enough :-)
-    * dump the existing db to qa-2009-10-01.db file
-    * python dbdump.py  qa-2009-10-01.db > hit.sql
-    * copy hit.sql to your_path/omero_qa/registry/sql/
+        GeoIP2-Domain.mmdb, GeoIPOrg.dat, GeoLite2-City.mmdb
 
 Configuration
 =============
 
-* Copy settings.py to settings-prod.py
+* Create new settings-prod.py and import default settings
+
+        from settings import *
+
+* Set `DEBUG`
+
+        DEBUG=False
+        TEMPLATE_DEBUG = DEBUG
 
 * Set `ADMINS`
 
         ADMINS = (
-            ('Aleksandra Tarkowska', 'A.Tarkowska@dundee.ac.uk'),
+            ('Full Name', 'email@example.com'),
         )
 
 * Change database settings
 
-        ...
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'feedback',                      # Or path to database file if using sqlite3.
-        'USER': 'feedback_user',                      # Not used with sqlite3.
-        'PASSWORD': 'password',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
-        ...
-
-* Modify `FEEDBACK_URL = "qa.openmicroscopy.org.uk:80"` - this is the host where errors should be reported if application itself crashes
-
-* Google key on http://code.google.com/apis/maps/signup.html 
-
-        mage.open...    GOOGLE_KEY = "***REMOVED***"
-        qa.open...      GOOGLE_KEY = "***REMOVED***"
-
-* Please DO NOT change second key, it is registered for http://registry.openmicroscopy.org.uk
-
-        GOOGLE_KEY2 = "***REMOVED***"
-    
-* Create rest of required dirs:
-    * UPLOAD_ROOT = "/FileStore" <- this is equivalent of /ome/apache_repo
-    * VALIDATOR_UPLOAD_ROOT = "/Validator"
-    * TESTNG_ROOT = "/TestNG"
- 
-* Set up `OME_HUDSON_PATH = "/ome/hudson/jobs"`
-
-* Set up `APPLICATION_HOST = "http://qa.openmicroscopy.org.uk"`- this is part of the url what appears in email. When user click it, should jump to the feedback page.
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                                                # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+                'NAME': 'stats_database',       # Or path to database file if using sqlite3.
+                'USER': 'stats_user',           # Not used with sqlite3.
+                'PASSWORD': 'secret',           # Not used with sqlite3.
+                'HOST': 'localhost',            # Set to empty string for localhost. Not used with sqlite3.
+                'PORT': '5432',                 # Set to empty string for default. Not used with sqlite3.
+            }
+        }
 
 * Set up email server
     
@@ -95,95 +74,80 @@ Configuration
         EMAIL_HOST_PASSWORD = ''
         EMAIL_HOST_USER = ''
         EMAIL_PORT = 25
-        EMAIL_SUBJECT_PREFIX = '[OMERO.qa] '
+        EMAIL_SUBJECT_PREFIX = '[OMERO.stats] '
         EMAIL_USE_TLS = False
-        SERVER_EMAIL = 'A.Tarkowska@dundee.ac.uk' # email address
+        SERVER_EMAIL = 'email@example.com' # email address
+
+* WSGI config file for virtual environment (omerostats/django.wsgi):
+
+        import os
+        import sys
+        import site
+
+        # Add the site-packages of the chosen virtualenv to work with
+        site.addsitedir('/path/to/stats-virtualenv/lib64/python2.6/site-packages')
+
+        # Add the app's directory to the PYTHONPATH
+        sys.path.append('/path/to/stats.git/')
+        sys.path.append('/path/to/stats.git/omerostats')
+
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "omerostats.settings-prod")
+
+        # Activate your virtual env
+        activate_env=os.path.expanduser('/path/to/stats-virtualenv/bin/activate_this.py')
+        execfile(activate_env, dict(__file__=activate_env))
+
+        import django.core.handlers.wsgi
+        application = django.core.handlers.wsgi.WSGIHandler()
 
 * Synchronise the database
 
-        python manage.py syncdb --settings=settings-prod
-    
-__WARNING:__ If you see memory issue, move hit.sql file out of application directory, run syncdb again (it will create every tables for you), then:
-psql -U feedback_user feedback < hit.sql
+        export DJANGO_SETTINGS_MODULE=omerostats.settings-prod
+        python manage.py syncdb
+        python manage.py sqlcustom registry | python manage.py dbshell
 
-__WARNING:__ What is qa.openmicroscopy.org.uk/map?
+* Populated GEO details about IPs
+        python upgrade/ip.py
 
-The purpose of that page is availability under the http://registry.openmicroscopy.org.uk. It shows up as an independent page and require the following configuration:
+* Collect statics
+
+        python manage.py collectstatic
+
+* Setup apache
 
     <VirtualHost *:80>
-            ServerAdmin webmaster@openmicroscopy.org.uk
-            DocumentRoot /var/www/localhost/htdocs/
-            ServerName registry.openmicroscopy.org.uk
 
-            RewriteEngine on
-            RewriteRule ^/$ http://qa.openmicroscopy.org.uk/map/ [P]
-            RewriteRule ^/xml/$ http://qa.openmicroscopy.org.uk/registry/geoxml/ $
+        ServerAlias stats.openmicroscopy.org
+        ServerName stats.openmicroscopy.org
+        ServerAdmin sysadmin@openmicroscopy.org
 
-            <Directory "/var/www/localhost/htdocs">
-                    AllowOverride All
-                    Options None
-                    Order allow,deny
-                    Allow from all
-            </Directory>
+        ErrorLog /var/log/httpd/stats.openmicroscopy.org.err
+        CustomLog /var/log/httpd/stats.openmicroscopy.org.log combined
+
+        DocumentRoot /home/omero-stats/stats.git
+
+        WSGIDaemonProcess omerostats processes=2 threads=15 display-name=%{GROUP} python-path=/home/omero-stats/stats.git:/home/omero-stats/reg-virtualenv/lib/python2.6/site-packages
+        WSGIProcessGroup omerostats
+
+        WSGIScriptAlias / /home/omero-stats/stats.git/omerostats/django.wsgi
+
+        <Directory /home/omero-stats/stats.git/omerostats/>
+            Order allow,deny
+            Allow from all
+        </Directory>
+
+        Alias /static /home/omero-stats/stats.git/static
+        <Location "/static/">
+            Options -Indexes
+        </Location>
+
     </VirtualHost>
+    WSGISocketPrefix run/wsgi
 
-any changes require changes in the template/big_map.html
-
-Trac systems
-============
-
- * Configure user to create ticket in Trac
- 
-        trac.openmicroscopy.org.uk/ome
-
-Site 1
-======
-
-Login to admin panel and change `Site = 1` to current qa_host qa.openmicroscopy.org.uk.
-
-Upgrade hits
-============
-
-* Create old db backup as `r-date.db`
-* Run migration script
-
-        python doc/dbdump.py r-date.db > hit.sql
-
-* Perform upgrade
- 
-        pg_dump -Fc -f ...
-        drop table registry_ip;
-        rm initial_data.json
-        sudo -u apache -s
-        python manage.py syncdb --settings=settings-prod
-        psql -h localhost -U feedback feedback < hit.sql
-
-* Restore from backup
-
-        pg_restore -h localhost -U feedback -Fc -d feedback file_name
-
-Upgrade 1.1
-===========
-
-* Backup db
-
-        pg_dump -Fc -h localhost -p 5433 -U feedback -f r-date.db feedback
-
-* Run migration script
-
-        python doc/upgrade-1.1.py > newdb-1.1.sql
-
-* Clean up and perform upgrade
-
-        DROP TABLE "registry_hit";
-        DROP TABLE "registry_ip";
-        DROP TABLE "registry_agent";
-        python manage.py syncdb --settings=settings-prod
-        psql -h localhost -p 5433 -U feedback feedback < newdb-1.1.sql
 
 Legal
 =====
 
-The source for OMERO.qa is released under the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+The source for OMERO.stats is released under the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-OMERO.qa is Copyright (C) 2008-2012 University of Dundee
+OMERO.stats is Copyright (C) 2008-2015 University of Dundee

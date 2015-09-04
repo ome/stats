@@ -1,0 +1,239 @@
+html {
+    text-align: justify;
+}
+
+body {
+    background-color: #fff;
+    font-size: 13px;
+    font-family: Arial, Verdana, Lucida, Helvetica, sans-serif;
+    color: #555;
+    margin: 0;
+    padding: 0;
+}
+.error_content {
+    background-color: #fff;
+}
+
+
+
+#menuWrapper {
+    border-top: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
+    background-color: #eee;
+    padding: 10px;
+    position: relative;
+    height: 17px;
+}
+#welcome {
+    position: relative;
+    right: 10px;
+    text-align: right;
+    float: right;
+}
+
+#menu {
+    left: 10px;
+    position: relative;
+    float: left;
+}
+
+#bodyWrapper {
+    padding: 10px;
+}
+
+.error {
+    clear: both;
+    color: #e3646f;
+    font-size: 14px;
+    text-align: center;
+}
+
+img {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    vertical-align: middle;
+}
+
+a {
+    color: #1b7bc7;
+    text-decoration: none;
+}
+a:hover,a:link,a:visited {
+    color: #1b7bc7;
+    text-decoration: none;
+}
+a.selected {
+    color: #da1447;
+}
+h1 {
+    font-size: 15px;
+    text-align: left;
+    margin: 0;
+    padding: 5px 0;
+}
+h2 {
+    font-size: 18px;
+    text-align: left;
+    margin: 0;
+    padding: 5px 0;
+}
+
+p {
+    margin: 0px;
+    padding: 0 10px;
+}
+
+table {
+    text-align: center;
+}
+
+td {
+    text-align: left;
+    padding: 0px;
+}
+td.center {
+    text-align: center;
+}
+td.left {
+    text-align: left;
+}
+td.right {
+    text-align: right;
+}
+
+th {
+    font-weight: bold;
+}
+th.right {
+    text-align: right;
+    padding-right: 10px;
+}
+
+input {
+    margin: 0;
+    border: 1px solid #bbb;
+    background-color: #fafafa;
+}
+div.login_form input {
+    margin: 0;
+    border: 1px solid #bbb;
+    background-color: #fafafa;
+    height: 14px;
+}
+div.login_form input.login {
+    margin: 0;
+    border: 1px solid #bbb;
+    background-color: #fafafa;
+    height: 18px;
+}
+div.form input{
+    margin: 0;
+    border: 1px solid #bbb;
+    background-color: #fafafa;
+    height: 14px;
+}
+
+div.hidden_form {
+    display:none;
+}
+
+select {
+    margin: 0;
+    background-color: #fafafa;
+    border: 1px solid #bbb;
+}
+textarea {
+    margin: 0;
+    background-color: #fafafa;
+    border: 1px solid #bbb;
+}
+
+form table {
+    text-align: center;
+    border: 0px;
+}
+
+form td {
+    text-align: left;
+    padding: 10px;
+}
+div.login_form form td {
+    text-align: left;
+    padding: 2px;
+}
+
+form th {
+    text-align: right;
+    border: 0px;
+    padding: 10px;
+}
+div.login_form form th {
+    text-align: right;
+    border: 0px;
+    padding: 2px;
+}
+ul.errorlist {
+    list-style: none;
+    color: #e3646f;
+    margin: 0;
+    padding: 3px 0 0;
+    text-align: center;
+}
+ul.errorlist li {
+    border-style:none;
+    border-width:0;
+}
+
+p.warning{
+    color: #E3646F;
+}
+
+.clear {
+    clear: both;
+    width: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+.separate50 {
+    clear: both;
+    height: 50px;
+    margin: 0px;
+    padding: 0px;
+}
+.separate30 {
+    clear: both;
+    height: 30px;
+    margin: 0px;
+    padding: 0px;
+}
+label {
+    font-weight: bold;
+}
+
+div.left {
+    width:500px;
+    float:left;
+}
+div.right {
+    width:400px;
+    float:right;
+}
+
+ul.filestore li {
+    list-style: none;
+    margin:0;
+	padding:0x;
+}
+div.paging {
+    font-size: 15px;
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+}
+
+.map {
+    width: 950px;
+    height: 600px;
+    border: 1px solid #bbb;
+}

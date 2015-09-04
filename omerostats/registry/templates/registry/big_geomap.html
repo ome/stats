@@ -1,0 +1,184 @@
+{% load i18n %}
+{% load staticfiles %}
+{% load custom_tags %}
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+{% comment %}
+<!--
+  Copyright (C) 2009-2015 University of Dundee & Open Microscopy Environment.
+  All rights reserved.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+{% endcomment %}
+
+    <head>
+    
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+    
+    
+        <title>{% trans "OMERO.stats" %}</title>
+        <link rel="stylesheet" href="{% static "registry/css/layout.css" %}" type="text/css" media="screen"/>
+        <link rel="stylesheet" href="{% static "registry/css/jquery-ui.1.10.4.min.css" %}" type="text/css" media="screen"/>
+        <link rel="stylesheet" href="{% static "registry/css/jquery.multiselect.css" %}" type="text/css" media="screen"/>
+
+        <style>
+            html, body, #map {
+                height: 100%;
+                margin: 0px;
+                padding: 0px
+            
+            }
+        </style>
+
+        <script type="text/javascript" src='{% static "registry/javascript/jquery-1.10.2.js" %}'></script>
+        <script type="text/javascript" src='{% static "registry/javascript/jquery-ui.1.10.4.min.js" %}'></script>
+        <script type="text/javascript" src='{% static "registry/javascript/jquery.multiselect.min.js" %}'></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+        <script type="text/javascript" src='{% static "registry/javascript/google/markerclusterer.js" %}'></script>
+
+        <script>
+
+        var clusterStyles = [
+          {
+            textSize: 20,
+            url: '{% static "registry/images/m1.png" %}',
+            height: 53,
+            width: 53
+          },
+          {
+            textSize: 18,
+            url: '{% static "registry/images/m2.png" %}',
+            height: 56,
+            width: 56
+          },
+          {
+            textSize: 20,
+            url: '{% static "registry/images/m3.png" %}',
+            height: 76,
+            width: 76
+          },
+          {
+             textSize: 20,
+             url: '{% static "registry/images/m4.png" %}',
+             height: 92,
+             width: 92
+           },
+           {
+              textSize: 20,
+              url: '{% static "registry/images/m5.png" %}',
+              height: 90,
+               width: 90
+            }
+        ];
+        
+        var map;
+        var cluster = false;
+        var markerCluster;
+        var markersArray = new Array();
+        function initMap() {
+            var mapOptions = {
+                zoom: 3 ,
+                center: new google.maps.LatLng(0, 10),
+                disableDefaultUI: false
+            };
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            markerCluster = new MarkerClusterer(map);
+        }
+        google.maps.event.addDomListener(window, 'load', initMap);
+
+        $(function(){
+           
+            $("#filter").submit(function(e) {
+                e.preventDefault();
+
+                markerCluster.clearMarkers();
+                for(var i=0; i<markersArray.length; i++){
+                    markersArray[i].setMap(null);
+                }
+                markersArray = new Array();
+
+                cluster = $("#id_cluster").is(":checked");
+
+                var formdata = $(this).serialize();
+                $.getJSON('{% url 'registry_geoxml' %}?'+formdata, function(rsp) {
+
+                    $("#count").text(rsp.length + " objects found.");
+                    if (cluster || rsp.length > 10000) {
+                        $.each(rsp, function(key, data) {
+                            var latLng = new google.maps.LatLng(data.fields.latitude, data.fields.longitude); 
+                            // Creating a marker and putting it on the map
+                            var marker = new google.maps.Marker({
+                                position: latLng,
+                                title: data.fields.ip + " - " + data.fields.org
+                            });
+                            markersArray.push(marker);
+                        });
+                        markerCluster = new MarkerClusterer(map, markersArray, {
+                            minimumClusterSize: 1,
+                            styles: clusterStyles
+                            });
+                    } else {
+                        $.each(rsp, function(key, data) {
+                            var latLng = new google.maps.LatLng(data.fields.latitude, data.fields.longitude); 
+                            // Creating a marker and putting it on the map
+                            var marker = new google.maps.Marker({
+                                position: latLng,
+                                title: data.fields.ip + " - " + data.fields.org
+                            });
+                            markersArray.push(marker);
+                        });
+                        for(var i=0; i<markersArray.length; i++){
+                            markersArray[i].setMap(map);
+                            
+                        }
+                    }
+                })
+                .error(function(rsp) {
+                    $("#count").text(rsp.responseText);
+                });
+                $("#count").text("Loading... please wait, it can take a while.");
+            });
+            
+        });
+        </script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#id_agent").multiselect(); 
+                $("#id_country").multiselect();
+            });
+        </script>
+        
+    </head>
+    <body>
+        <form id="filter"><table>
+            <tr>
+            {% for field in map_form %}
+                <td>{{ field.label_tag }}</td>
+                <td>{{ field }}</td><td>{% if field.errors %}{{ field.errors }}{% endif %}<!--{{ field.help_text }}--></td>
+            {% endfor %}
+            <td><button id="submit">Submit</button></td>
+            </tr>
+        </table></form>
+        <div class="error" id="count"></div><br/>
+        <div id="map"></div>
+
+    </body>
+</html>

@@ -1,0 +1,77 @@
+{% extends "registry/base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% comment %}
+<!--
+  Copyright (C) 2009-2015 University of Dundee & Open Microscopy Environment.
+  All rights reserved.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+{% endcomment %}
+
+
+{% block link %}
+    <link rel="stylesheet" href='{% static "registry/css/login.css" %}' type="text/css" media="screen"/>
+    
+
+{% endblock %}
+    
+        
+{% block content %}
+
+    <div class="login-logos">
+        <img src="{% static "registry/images/logo_login_web.png" %}" />
+    </div>
+
+    <div id="login">
+        {% if login_form %}<form class="standard_form inlined"  action="{% url 'registry_login' %}{% if next %}?next={{ next }}{% endif %}" method="post" >{% csrf_token %}
+
+            <div class="error">{% if error %}{{ error }}{% endif %}</div>
+
+                {% for field in login_form %}
+        			<div>
+        				{% trans field.label_tag %}
+        				<!--{% if field.field.required %}*{% endif %} -->
+        				{{ field }}
+        				<!-- Form Error -->
+        				{% if field.errors %}
+                          {% for error in field.errors %}
+                              <span class="error">{{ error|escape }}</span>
+                          {% endfor %}
+        				{% endif %}
+        			</div>
+
+                {% endfor %}
+                <input type="submit" value="{% trans 'Login' %}"/>
+
+        </form>{% endif %}
+    </div>
+
+
+    <div id="login-footer">
+	
+	
+    	<p>
+    		OMERO.stats.<br/>
+    		&copy; 20015 University of Dundee &amp; Open Microscopy Environment<br/>
+    		OMERO is distributed under the terms of the GNU GPL.
+    		For more information, visit <a href="http://www.openmicroscopy.org">openmicroscopy.org</a><br/>
+
+            <img src="{% static 'registry/images/OME_logo_grey_110.png' %}"/>
+        </p>
+    </div>
+{% endblock %}
+
