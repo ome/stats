@@ -177,17 +177,26 @@ def get_markers_as_xml(request, **kwargs):
         if v and len(v) > 0:
             subargs = list()
             if v.startswith("5.0"):
-                subargs.append((
-                    Q(version__startswith=v) |
-                    Q(version__startswith='4.5')))
+                subargs.append(
+                    (
+                        Q(version__startswith=v) |
+                        Q(version__startswith='4.5')
+                    )
+                )
             elif v.startswith("4.2"):
-                subargs.append((
-                    Q(version__startswith=v) |
-                    Q(version__startswith='Beta-4.2')))
+                subargs.append(
+                    (
+                        Q(version__startswith=v) |
+                        Q(version__startswith='Beta-4.2')
+                    )
+                )
             elif v.startswith("4.1"):
-                subargs.append((
-                    Q(version__startswith=v) |
-                    Q(version__startswith='Beta-4.1')))
+                subargs.append(
+                    (
+                        Q(version__startswith=v) |
+                        Q(version__startswith='Beta-4.1')
+                    )
+                )
             else:
                 subargs.append(Q(version__startswith=v))
             agent_version = AgentVersion.objects.filter(*subargs)
@@ -213,9 +222,12 @@ def get_markers_as_xml(request, **kwargs):
                 pass
 
             if continent and country_ids:
-                args.append((
-                    Q(ip__continent__id=continent.id) |
-                    Q(ip__country__in=country_ids)))
+                args.append(
+                    (
+                        Q(ip__continent__id=continent.id) |
+                        Q(ip__country__in=country_ids)
+                    )
+                )
             elif continent:
                 args.append(Q(ip__continent__id=continent.id))
             elif country_ids:
@@ -290,17 +302,26 @@ def local_statistic(request):
             if v and len(v) > 0:
                 subargs = list()
                 if v.startswith("5.0"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='4.5')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='4.5')
+                        )
+                    )
                 elif v.startswith("4.2"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='Beta-4.2')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='Beta-4.2')
+                        )
+                    )
                 elif v.startswith("4.1"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='Beta-4.1')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='Beta-4.1')
+                        )
+                    )
                 else:
                     subargs.append(Q(version__startswith=v))
                 agent_version = AgentVersion.objects.filter(*subargs)
@@ -317,7 +338,8 @@ def local_statistic(request):
             result = Hit.objects \
                 .filter(*args) \
                 .values(
-                    'ip__domain__name', 'ip__organisation__name',
+                    'ip__domain__name',
+                    'ip__organisation__name',
                     'agent__display_name') \
                 .annotate(hit_total_count=Count('id')) \
                 .annotate(hit_unique_count=Count('ip__id', distinct=True))
@@ -401,17 +423,26 @@ def monthly_statistics(request):
             if v and len(v) > 0:
                 subargs = list()
                 if v.startswith("5.0"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='4.5')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='4.5')
+                        )
+                    )
                 elif v.startswith("4.2"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='Beta-4.2')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='Beta-4.2')
+                        )
+                    )
                 elif v.startswith("4.1"):
-                    subargs.append((
-                        Q(version__startswith=v) |
-                        Q(version__startswith='Beta-4.1')))
+                    subargs.append(
+                        (
+                            Q(version__startswith=v) |
+                            Q(version__startswith='Beta-4.1')
+                        )
+                    )
                 else:
                     subargs.append(Q(version__startswith=v))
                 agent_version = AgentVersion.objects.filter(*subargs)
