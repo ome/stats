@@ -2,7 +2,7 @@
 #
 #
 #
-# Copyright (c) 2009 University of Dundee.
+# Copyright (c) 2009-2015 University of Dundee.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as

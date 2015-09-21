@@ -2,7 +2,7 @@
 #
 #
 #
-# Copyright (c) 2008 University of Dundee.
+# Copyright (c) 2008-2015 University of Dundee.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -52,30 +52,6 @@ def month_year_table(startdate, enddate, agents):
             startdate.month, startdate.year, enddate.month, enddate.year):
         month = month < 10 and ("0%i" % (month)) or str(month)
         idx = "%s-%s" % (year, month)
-        table[idx] = dict()
-        table[idx]['All*'] = {'total': 0, 'unique': 0}
-        for a in agents:
-            if a.id in (7, 13):
-                name = "BF (7,13)"
-            else:
-                name = "%s (%i)" % (a.display_name, a.id)
-            table[idx][name] = {'total': 0, 'unique': 0}
-
-    return table
-
-
-def year_table(startdate, enddate, agents):
-
-    def year_iter(start_year, end_year):
-        y_start = start_year
-        y_end = end_year
-        for y in range(y_start, y_end):
-            yield y
-
-    table = dict()
-
-    for year in year_iter(startdate.year, enddate.year):
-        idx = "%s" % (year)
         table[idx] = dict()
         table[idx]['All*'] = {'total': 0, 'unique': 0}
         for a in agents:
