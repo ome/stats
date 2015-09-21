@@ -150,4 +150,4 @@ Legal
 
 The source for OMERO.stats is released under the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-OMERO.stats is Copyright (C) 2008-2015 University of Dundee
+OMERO.stats is Copyright (C) 2015 University of Dundee
