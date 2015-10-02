@@ -1,27 +1,27 @@
 #!/usr/bin/env python
-# 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# #                 Django settings for OMERO.qa project.               # # 
+#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# 
-# 
-# Copyright (c) 2009-2015 University of Dundee. 
-# 
+# #                 Django settings for OMERO.qa project.               # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#
+# Copyright (c) 2009-2015 University of Dundee.
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# 
+#
 # Author: Aleksandra Tarkowska <A(dot)Tarkowska(at)dundee(dot)ac(dot)uk>, 2008.
-# 
+#
 # Version: 1.0
 #
 
@@ -37,7 +37,8 @@ logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Logging levels: logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR logging.CRITICAL
+# Logging levels: logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR
+# logging.CRITICAL
 
 LOGDIR = os.path.join(os.path.dirname(__file__), '..', 'log')
 if not os.path.isdir(LOGDIR):
@@ -140,14 +141,13 @@ LOGGING = {
     }
 }
 
-
-# Debuging mode. 
+# Debuging mode.
 # A boolean that turns on/off debug mode.
 # For logging configuration please change 'LEVEL = logging.INFO' below
-# 
+#
 # NEVER DEPLOY a site into production with DEBUG turned on.
 # handler404 and handler500 works only when False
-DEBUG = True 
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -261,21 +261,18 @@ TIME_ZONE = 'Europe/London'
 LOGIN_URL = "/registry/login/"
 # SESSION_EXPIRE_AT_BROWSER_CLOSE: A boolean that determines whether to expire
 # the session when the user closes their browser.
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True # False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # False
 
 # The age of session cookies, in seconds.
-SESSION_COOKIE_AGE = 86400 # 1 day in sec (86400)
+SESSION_COOKIE_AGE = 86400  # 1 day in sec (86400)
 
 
 GEOIPDOMAIN = os.path.join(
-                  os.path.dirname(__file__), 'GeoIP2-Domain.mmdb'
-              ).replace('\\','/')
+    os.path.dirname(__file__), 'GeoIP2-Domain.mmdb').replace('\\', '/')
 GEOIPORG = os.path.join(
-               os.path.dirname(__file__), 'GeoIPOrg.dat'
-           ).replace('\\','/')
+    os.path.dirname(__file__), 'GeoIPOrg.dat').replace('\\', '/')
 GEOIPCITY = os.path.join(
-                os.path.dirname(__file__), 'GeoLite2-City.mmdb'
-            ).replace('\\','/')
+    os.path.dirname(__file__), 'GeoLite2-City.mmdb').replace('\\', '/')
 
 UPGRADE_CHECK_URL = "http://trac.openmicroscopy.org.uk/omero/wiki/UpgradeCheck"
 
@@ -286,6 +283,8 @@ EMAIL_HOST_USER = ''
 EMAIL_PORT = 25
 EMAIL_SUBJECT_PREFIX = '[OMERO.stats-staging]'
 EMAIL_USE_TLS = False
-SERVER_EMAIL=None
+SERVER_EMAIL = None
 
-IPLOCALREGEX = r"(^127\.)|(^192\.168\.)|(^10\.)|(^134\.36\.162\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)"
+IPLOCALREGEX = (
+    r"(^127\.)|(^192\.168\.)|(^10\.)|(^134\.36\.162\.)|(^172\.1[6-9]\.)|"
+    "(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)")
