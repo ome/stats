@@ -33,8 +33,9 @@
 #
 
 Cython==0.22
-Django==1.6.9
--e hg+http://hg.saddi.com/flup-server#egg=flup
+Django==1.6.11
+#-e hg+http://hg.saddi.com/flup-server#egg=flup
+flup
 pygeoip==0.3.2
 geoip2==2.1.0
 ipaddr==2.1.11
